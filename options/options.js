@@ -2,11 +2,14 @@
 function save_options() {
   // Get the filename to be saved
   var FileName = document.getElementById('FileName').value;
-  
+
+  // Get Session Duration
+  var SessionDurationInput = document.getElementById('SessionDurationInput').value;
+
   // Does SessionDuration needs to be applied?
-	var ApplySessionDuration = $("#SessionDuration option:selected").val();
+  var ApplySessionDuration = $("#SessionDuration option:selected").val();
 	
-	// Is DEBUG log enabled?
+  // Is DEBUG log enabled?
   var DebugLogs = $("#DebugLogs option:selected").val();
 
   // Get the Role_ARN's (Profile/ARNs pairs) entered by the user in the table
@@ -25,6 +28,7 @@ function save_options() {
   // Do the actual saving into Chrome storage
   chrome.storage.sync.set({
     FileName: FileName,
+    SessionDurationInput: SessionDurationInput,
 		ApplySessionDuration: ApplySessionDuration,
 		DebugLogs: DebugLogs,
 	  RoleArns: RoleArns
@@ -48,12 +52,14 @@ function restore_options() {
   chrome.storage.sync.get({
 	// Default values
     FileName: 'credentials',
-		ApplySessionDuration: 'yes',
-		DebugLogs: 'no',
-	  RoleArns: {}
+  	SessionDurationInput: '28800',
+	ApplySessionDuration: 'yes',
+	DebugLogs: 'no',
+	RoleArns: {}
   }, function(items) {
 	// Set filename
     document.getElementById('FileName').value = items.FileName;
+    document.getElementById('SessionDurationInput').value = items.SessionDurationInput;
     // Set ApplySessionDuration
 		$("#SessionDuration").val(items.ApplySessionDuration);
 		// Set DebugLogs

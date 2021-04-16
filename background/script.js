@@ -1,5 +1,6 @@
 // Global variables
 var FileName = 'credentials';
+var SessionDurationInput = '28800';
 var ApplySessionDuration = true;
 var DebugLogs = false;
 var RoleArns = {};
@@ -103,12 +104,13 @@ function onBeforeRequestEvent(details) {
     hasRoleIndex = roleIndex != undefined;
   }
 
-  // Only set the SessionDuration if it was supplied by the SAML provider and 
-  // when the user has configured to use this feature.
-  if (SessionDuration !== undefined && ApplySessionDuration) {
-    SessionDuration = Number(SessionDuration.firstElementChild.textContent)
+  if (ApplySessionDuration) {
+    SessionDuration = Number(SessionDurationInput)
   } else {
-    SessionDuration = null;
+    // Set the SessionDuration if it was supplied by the SAML provider
+    SessionDuration = SessionDuration !== undefined ?
+        Number(SessionDuration.firstElementChild.textContent) :
+        null;
   }
 
   // Change newline sequence when client is on Windows
@@ -181,7 +183,7 @@ function extractPrincipalPlusRoleAndAssumeRole(samlattribute, SAMLAssertion, Ses
 			var docContent = "[default]" + LF +
 			"aws_access_key_id = " + data.Credentials.AccessKeyId + LF +
 			"aws_secret_access_key = " + data.Credentials.SecretAccessKey + LF +
-			"aws_session_token = " + data.Credentials.SessionToken;
+			"aws_session_token = " + data.Credentials.SessionToken + LF;
 
       if (DebugLogs) {
         console.log('DEBUG: Successfully assumed default profile');
@@ -233,7 +235,7 @@ function assumeAdditionalRole(profileList, index, AccessKeyId, SecretAccessKey, 
 			"[" + profileList[index] + "]" + LF +
 			"aws_access_key_id = " + data.Credentials.AccessKeyId + LF +
 			"aws_secret_access_key = " + data.Credentials.SecretAccessKey + LF +
-      "aws_session_token = " + data.Credentials.SessionToken;
+            "aws_session_token = " + data.Credentials.SessionToken + LF;
       
       if (DebugLogs) {
         console.log('DEBUG: Successfully assumed additional Role');
@@ -300,11 +302,13 @@ chrome.runtime.onMessage.addListener(
 function loadItemsFromStorage() {
   chrome.storage.sync.get({
     FileName: 'credentials',
+    SessionDurationInput: '28800',
     ApplySessionDuration: 'yes',
     DebugLogs: 'no',
     RoleArns: {}
   }, function(items) {
     FileName = items.FileName;
+    SessionDurationInput = items.SessionDurationInput;
     if (items.ApplySessionDuration == "no") {
       ApplySessionDuration = false;
     } else {
